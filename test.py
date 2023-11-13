@@ -27,12 +27,12 @@ def main():
     X = mix_sources(s1, s2, False, 0.02, True)
     wf.write('./talk_and_music.wav', sample_rate, X.mean(axis=0).astype(np.float32))
     
-    ica_model = ICA(device)
+    ica_model = ICA(device, lr = 0.0001, max_iter = 10000, l = 10000)
     nmf_model = NMF(device)
 
     X = mix_sources(s1, s2, False, 0.02, True)
 
-    separated_s1, separated_s2 = ica_model.predict(X)
+    separated_s1, separated_s2 = ica_model.predict_batch(X)
 
     wf.write('./ICAseparated_s1.wav', sample_rate, separated_s1)
     wf.write('./ICAseparated_s2.wav', sample_rate, separated_s2)

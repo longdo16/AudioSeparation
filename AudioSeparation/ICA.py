@@ -20,40 +20,43 @@ class ICA():
         self.l = l
     
     def predict_batch(self, X):
-        # factor 100.0
-        # lr = 0.0001, max_iter = 10000, l = 10000
-        n = X.shape[0]
-        t = X.shape[1]
+        n = X.shape[0] # Number of source signal
+        t = X.shape[1] # Time
         m = X.shape[0]
-        W = np.random.rand(n, m) / self.factor + self.epsilon
 
         # Initialize the (n by m) matrix W with small random values
         W = np.random.rand(n, m) / 10.0 + 1e-10
 
-        W = torch.from_numpy(W).to(self.device)
-        X = torch.from_numpy(X).to(self.device)
+        for i in range(10000):
 
-        for i in range(self.max_iter):
+          temp = t // self.l
 
-            temp = t // self.l
+          sumDeltaW = np.zeros((n, m))
 
-            sumDeltaW = np.zeros((n, m))
-            sumDeltaW = X = torch.from_numpy(sumDeltaW).to(self.device)
+          for j in range(temp + 1):
+            data = X[:, j * 1 : (j + 1) * 1]
 
-            for j in range(temp + 1):
-                data = X[:, j * 1 : (j + 1) * 1]
+            # Calculate Y = WX (Y is our current estimate of the source signals)
+            Y = np.matmul(W, data)
 
-                # Calculate Y = WX (Y is our current estimate of the source signals)
-                Y = torch.matmul(W, X)
+            # Calculate Z
+            Z = 1.0 / (1.0 + np.exp(-1 * Y))
 
-                Z = 1.0 / (1.0 + torch.exp(-1.0 * Y))
-                I = torch.eye(n).to(self.device)
-                delta_W = self.lr * torch.matmul((I + torch.matmul((1.0 - 2.0 * Z), Y.T)), W)
-                sumDeltaW += delta_W
-            
-            W = W + sumDeltaW
+            # Find delta W
+            deltaW = self.lr * np.matmul((np.identity(n) + np.matmul((1.0 - 2.0 * Z), Y.T)), W)
 
-        S = torch.matmul(W, X).numpy(force = True)
+            sumDeltaW += deltaW
+
+            # deltaW = deltaW / np.linalg.norm(deltaW)
+
+            # Update W
+            # W = W + deltaW
+          W = W + sumDeltaW
+
+          if i != 0 and i % 100 == 0:
+            print(np.linalg.norm(sumDeltaW))
+
+        S = np.matmul(W, X)
         return S[0, :], S[1, :]
     
     def predict(self, X):

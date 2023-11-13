@@ -45,7 +45,7 @@ class ICA():
                 Y = torch.matmul(W, X)
 
                 Z = 1.0 / (1.0 + torch.exp(-1.0 * Y))
-                I = torch.nn.Identity(n).to(self.device)
+                I = torch.eye(n).to(self.device)
                 delta_W = self.lr * torch.matmul((I + torch.matmul((1.0 - 2.0 * Z), Y.T)), W)
                 W = W + delta_W
             
@@ -66,7 +66,7 @@ class ICA():
             Y = torch.matmul(W, X)
 
             Z = 1.0 / (1.0 + torch.exp(-1.0 * Y))
-            I = torch.nn.Identity(n).to(self.device)
+            I = torch.eye(n).to(self.device)
             delta_W = self.lr * torch.matmul((I + torch.matmul((1.0 - 2.0 * Z), Y.T)), W)
             W = W + delta_W
 

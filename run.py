@@ -17,7 +17,7 @@ if __name__ == '__main__':
                         help="Speech Enhancement Method")
     parser.add_argument('--file_1', type=str, default='./data/talkonly.wav',
                         help="Speaker File")
-    parser.add_argument('--file_1', type=str, default='./data/piano.wav',
+    parser.add_argument('--file_2', type=str, default='./data/piano.wav',
                         help="Sound or Noise File")                
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     args = parser.parse_args()

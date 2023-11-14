@@ -26,8 +26,8 @@ class NMF():
         V, angle = self.process(X)
         K = V.shape[0]
         N = V.shape[1]
-        W = np.abs(np.random.normal(loc=0, scale = 2.5, size=(K,S)))
-        H = np.abs(np.random.normal(loc=0, scale = 2.5, size=(S,N)))
+        W = np.abs(np.random.normal(loc=0, scale = 2.5, size=(K, self.S)))
+        H = np.abs(np.random.normal(loc=0, scale = 2.5, size=(self.S, N)))
 
         for i in range(self.max_iter):
             

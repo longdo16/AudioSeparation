@@ -7,6 +7,7 @@ import IPython.display as ipd
 import librosa
 from scipy.io import wavfile as wf
 from sklearn import preprocessing
+from scipy import signal
 
 # Implement Spectral Subtraction for speech enhancement here
 
@@ -17,6 +18,8 @@ class SS():
         self.N = N
         self.a = a
         self.beta = beta
+        self.m = -1
+        self.hop_size = -1
     
     def spectral_oversubtraction(self, X):
         Y, est_Mn, est_Pn = self.noise_estimation_snr(X)
@@ -40,13 +43,20 @@ class SS():
         est_powX = np.maximum(np.abs(Y) ** 2 - alpha * est_Pn, self.beta * est_Pn)
         angle = np.angle(Y)
         temp = np.sqrt(est_powX) * np.exp(1j * angle)
-        result = librosa.istft(temp.T, n_fft = self.n_fft, hop_length = self.hop_length)
+        _, xrec = signal.istft(temp, fs = 22050, nperseg = self.m, noverlap = self.hop_size, nfft = self.m * 8)
 
-        return result
+        return xrec
 
 
     def noise_estimation_snr(self, X):
-        Y = librosa.stft(X, n_fft = self.n_fft, hop_length = self.hop_length)
+        win_t = 30e-3 # window size in seconds
+        fs = 22050
+        win_s = round(fs * win_t) # window size in samples
+        self.m = win_s
+        hop_size = win_s//2
+        self.hop_size = hop_size
+        _, _, Y = signal.stft(X, fs=fs, nperseg = win_s, noverlap=hop_size, nfft = win_s * 8)
+        Y = Y.T
         est_Mn = np.zeros(Y.shape[0])
         est_Pn = np.zeros(Y.shape[0])
 
@@ -70,11 +80,10 @@ class SS():
         Y, est_Mn, _ = self.noise_estimation_snr(X)
         est_magX = np.maximum(np.abs(Y) - est_Mn, 0)
         angle = np.angle(Y)
-
         temp = est_magX * np.exp(1j * angle)
-        result = librosa.istft(temp.T, n_fft = self.n_fft, hop_length = self.hop_length)
+        _, xrec = signal.istft(temp, fs = 22050, nperseg = self.m, noverlap = self.hop_size, nfft = self.m * 8)
 
-        return result
+        return xrec
     
     def spectral_subtraction_pow(self, X):
         Y, est_Mn, est_Pn = self.noise_estimation_snr(X)
@@ -82,6 +91,6 @@ class SS():
         angle = np.angle(Y)
 
         temp = est_powX * np.exp(1j * angle)
-        result = librosa.istft(temp.T, n_fft = self.n_fft, hop_length = self.hop_length)
+        _, xrec = signal.istft(temp, fs = 22050, nperseg = self.m, noverlap = self.hop_size, nfft = self.m * 8)
 
-        return result
+        return xrec

@@ -38,13 +38,14 @@ def main():
     wf.write('./ICAseparated_s1.wav', sample_rate, separated_s1)
     wf.write('./ICAseparated_s2.wav', sample_rate, separated_s2)
 
-    ss = SS()
+    # Spectral Subtraction does not work, use library instead
+    # ss = SS()
 
-    separated_s1_ss = ss.spectral_oversubtraction(separated_s1)
-    separated_s2_ss = ss.spectral_oversubtraction(separated_s2)
+    # separated_s1_ss = ss.spectral_oversubtraction(separated_s1)
+    # separated_s2_ss = ss.spectral_oversubtraction(separated_s2)
 
-    wf.write('./ICAseparated_s1_ss.wav', sample_rate, separated_s1_ss)
-    wf.write('./ICAseparated_s2_ss.wav', sample_rate, separated_s2_ss)
+    # wf.write('./ICAseparated_s1_ss.wav', sample_rate, separated_s1_ss)
+    # wf.write('./ICAseparated_s2_ss.wav', sample_rate, separated_s2_ss)
 
 if __name__ == '__main__':
     main()

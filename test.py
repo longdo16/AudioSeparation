@@ -12,6 +12,7 @@ from utils import process
 from utils import write
 from AudioSeparation.ICA import ICA
 from AudioSeparation.NMF import NMF
+from SpeechEnhancement.SS import SS
 import torch
 
 def main():
@@ -27,7 +28,7 @@ def main():
     X = mix_sources(s1, s2, False, 0.02, True)
     wf.write('./talk_and_music.wav', sample_rate, X.mean(axis=0).astype(np.float32))
     
-    ica_model = ICA(device, lr = 0.0001, max_iter = 1000, l = 10000)
+    ica_model = ICA(device, lr = 0.0001, max_iter = 1000, l = 10000, factor = 10.0)
     nmf_model = NMF(device)
 
     X = mix_sources(s1, s2, False, 0.02, True)
@@ -36,6 +37,14 @@ def main():
 
     wf.write('./ICAseparated_s1.wav', sample_rate, separated_s1)
     wf.write('./ICAseparated_s2.wav', sample_rate, separated_s2)
+
+    ss = SS()
+
+    separated_s1_ss = ss.spectral_oversubtraction(separated_s1)
+    separated_s2_ss = ss.spectral_oversubtraction(separated_s2)
+
+    wf.write('./ICAseparated_s1_ss.wav', sample_rate, separated_s1_ss)
+    wf.write('./ICAseparated_s2_ss.wav', sample_rate, separated_s2_ss)
 
 if __name__ == '__main__':
     main()

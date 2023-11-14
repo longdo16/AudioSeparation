@@ -25,9 +25,9 @@ class ICA():
         m = X.shape[0]
 
         # Initialize the (n by m) matrix W with small random values
-        W = np.random.rand(n, m) / 10.0 + 1e-10
+        W = np.random.rand(n, m) / self.factor + self.epsilon
 
-        for i in range(10000):
+        for i in range(self.max_iter):
 
           temp = t // self.l
           sumDeltaW = np.zeros((n, m))

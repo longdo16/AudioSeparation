@@ -27,7 +27,7 @@ def main():
     X = mix_sources(s1, s2, False, 0.02, True)
     wf.write('./talk_and_music.wav', sample_rate, X.mean(axis=0).astype(np.float32))
     
-    ica_model = ICA(device, lr = 0.0001, max_iter = 10000, l = 10000)
+    ica_model = ICA(device, lr = 0.0001, max_iter = 1000, l = 10000)
     nmf_model = NMF(device)
 
     X = mix_sources(s1, s2, False, 0.02, True)

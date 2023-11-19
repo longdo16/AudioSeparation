@@ -9,10 +9,9 @@ from scipy.io import wavfile as wf
 from sklearn import preprocessing
 import argparse
 import os
-import data.utils
-import model.utils as model_utils
-from test import predict_song
-from model.waveunet import Waveunet
+from .model.utils import DataParallel, load_model
+from .test import predict_song
+from .model.waveunet import Waveunet
 
 class WUN():
     def __init__(self, features=32, levels=6, feature_growth="double", 
@@ -29,6 +28,7 @@ class WUN():
         self.conv_type = conv_type
         self.res = res
         self.separate = separate
+        self.kernel_size = kernel_size
     
     def predict(self, file_name, sr):
         num_features = [self.features*i for i in range(1, self.levels+1)] if self.feature_growth == "add" else \
@@ -40,14 +40,14 @@ class WUN():
 
         cuda = False
         if torch.cuda.is_available():
-            model = model_utils.DataParallel(model)
+            model = DataParallel(model)
             print("move model to gpu")
             model.cuda()
             cuda = True
 
-        load_model = 'checkpoints/model'
-        print("Loading model from checkpoint " + str(load_model))
-        state = model_utils.load_model(model, None, load_model, cuda)
+        load_model_path = './WaveUNet/checkpoints/model'
+        print("Loading model from checkpoint " + str(load_model_path))
+        state = load_model(model, None, load_model_path, cuda)
         print('Step', state['step'])
 
         preds = predict_song(self.channels, sr, file_name, model)

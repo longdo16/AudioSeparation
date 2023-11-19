@@ -4,9 +4,8 @@ from tqdm import tqdm
 import numpy as np
 import torch
 
-import data.utils
-import model.utils as model_utils
-import utils
+from .data.utils import load, resample
+from .model.utils import compute_loss
 
 def compute_model_output(model, inputs):
     '''
@@ -92,7 +91,7 @@ def predict_song(channels, sr, audio_path, model):
     model.eval()
 
     # Load mixture in original sampling rate
-    mix_audio, mix_sr = data.utils.load(audio_path, sr=None, mono=False)
+    mix_audio, mix_sr = load(audio_path, sr=None, mono=False)
     mix_channels = mix_audio.shape[0]
     mix_len = mix_audio.shape[1]
 
@@ -106,12 +105,12 @@ def predict_song(channels, sr, audio_path, model):
             assert(mix_channels == channels)
 
     # resample to model sampling rate
-    mix_audio = data.utils.resample(mix_audio, mix_sr, sr)
+    mix_audio = resample(mix_audio, mix_sr, sr)
 
     sources = predict(mix_audio, model)
 
     # Resample back to mixture sampling rate in case we had model on different sampling rate
-    sources = {key : data.utils.resample(sources[key], sr, mix_sr) for key in sources.keys()}
+    sources = {key : resample(sources[key], sr, mix_sr) for key in sources.keys()}
 
     # In case we had to pad the mixture at the end, or we have a few samples too many due to inconsistent down- and upsamṕling, remove those samples from source prediction now
     for key in sources.keys():
@@ -153,7 +152,7 @@ def evaluate(args, dataset, model, instruments):
             print("Evaluating " + example["mix"])
 
             # Load source references in their original sr and channel number
-            target_sources = np.stack([data.utils.load(example[instrument], sr=None, mono=False)[0].T for instrument in instruments])
+            target_sources = np.stack([load(example[instrument], sr=None, mono=False)[0].T for instrument in instruments])
 
             # Predict using mixture
             pred_sources = predict_song(args, example["mix"], model)
@@ -194,7 +193,7 @@ def validate(args, model, criterion, test_data):
                 for k in list(targets.keys()):
                     targets[k] = targets[k].cuda()
 
-            _, avg_loss = model_utils.compute_loss(model, x, targets, criterion)
+            _, avg_loss = compute_loss(model, x, targets, criterion)
 
             total_loss += (1. / float(example_num + 1)) * (avg_loss - total_loss)
 

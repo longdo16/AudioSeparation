@@ -11,7 +11,7 @@ from sklearn import preprocessing
 # Implement ICA for audio source separation here
 
 class ICA():
-    def __init__(self, device, lr = 0.01, max_iter = 2000, factor = 100.0, epsilon = 1e-10, l = 10000):
+    def __init__(self, device, lr = 0.0001, max_iter = 10000, factor = 10.0, epsilon = 1e-10, l = 100000):
         self.device = device
         self.lr = lr
         self.max_iter = max_iter

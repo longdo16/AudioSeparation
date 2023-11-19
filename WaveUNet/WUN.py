@@ -15,7 +15,7 @@ from .model.waveunet import Waveunet
 
 class WUN():
     def __init__(self, features=32, levels=6, feature_growth="double", 
-                output_size=2.0, channels=2, instruments=["bass", "drums", "other", "vocals"], kernel_size=5, 
+                output_size=2.0, channels=2, instruments=["other", "vocals"], kernel_size=5, 
                 depth=1, strides=4, conv_type="gn", res="fixed", separate=1):
         self.features = features
         self.levels = levels

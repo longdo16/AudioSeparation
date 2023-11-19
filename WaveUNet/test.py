@@ -80,7 +80,7 @@ def predict(audio, model):
             outputs = outputs.cuda()
     return outputs
 
-def predict_song(args, audio_path, model):
+def predict_song(channels, sr, audio_path, model):
     '''
     Predicts sources for an audio file for which the file path is given, using a given model.
     Takes care of resampling the input audio to the models sampling rate and resampling predictions back to input sampling rate.
@@ -97,21 +97,21 @@ def predict_song(args, audio_path, model):
     mix_len = mix_audio.shape[1]
 
     # Adapt mixture channels to required input channels
-    if args.channels == 1:
+    if channels == 1:
         mix_audio = np.mean(mix_audio, axis=0, keepdims=True)
     else:
         if mix_channels == 1: # Duplicate channels if input is mono but model is stereo
-            mix_audio = np.tile(mix_audio, [args.channels, 1])
+            mix_audio = np.tile(mix_audio, [channels, 1])
         else:
-            assert(mix_channels == args.channels)
+            assert(mix_channels == channels)
 
     # resample to model sampling rate
-    mix_audio = data.utils.resample(mix_audio, mix_sr, args.sr)
+    mix_audio = data.utils.resample(mix_audio, mix_sr, sr)
 
     sources = predict(mix_audio, model)
 
     # Resample back to mixture sampling rate in case we had model on different sampling rate
-    sources = {key : data.utils.resample(sources[key], args.sr, mix_sr) for key in sources.keys()}
+    sources = {key : data.utils.resample(sources[key], sr, mix_sr) for key in sources.keys()}
 
     # In case we had to pad the mixture at the end, or we have a few samples too many due to inconsistent down- and upsamṕling, remove those samples from source prediction now
     for key in sources.keys():
@@ -124,11 +124,11 @@ def predict_song(args, audio_path, model):
             sources[key] = np.pad(sources[key], [(0,0), (0, -diff)], "constant", 0.0)
 
         # Adapt channels
-        if mix_channels > args.channels:
-            assert(args.channels == 1)
+        if mix_channels > channels:
+            assert(channels == 1)
             # Duplicate mono predictions
             sources[key] = np.tile(sources[key], [mix_channels, 1])
-        elif mix_channels < args.channels:
+        elif mix_channels < channels:
             assert(mix_channels == 1)
             # Reduce model output to mono
             sources[key] = np.mean(sources[key], axis=0, keepdims=True)

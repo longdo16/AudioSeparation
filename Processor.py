@@ -14,6 +14,7 @@ from utils import spectral_substraction
 from utils import wiener_filtering
 from AudioSeparation.ICA import ICA
 from AudioSeparation.NMF import NMF
+from WaveUNet.WUN import WUN
 from SpeechEnhancement.SS import SS
 import torch
 
@@ -31,6 +32,7 @@ class Processor():
             self.model = NMF()
             self.dir = './NMF/'
         elif self.audio_separation == 'WUN':
+            self.mode = WUN()
             self.dir = './WUN/'
             pass
     
@@ -57,7 +59,13 @@ class Processor():
             X, sr = librosa.load('./mixture/talk_and_music.wav', sr = sample_rate)
             separated_s1, separated_s2 = self.model.predict(X)
         else:
-            pass
+            X = X.mean(axis=0).astype(np.float32)
+            X_1 = X[: X.shape[0] // 2,]
+            X_2 = X[X.shape[0] // 2:, ]
+            wf.write('./mixture/talk_and_music_1.wav', sample_rate, X_1.mean(axis=0).astype(np.float32))
+            wf.write('./mixture/talk_and_music_2.wav', sample_rate, X_2.mean(axis=0).astype(np.float32))
+            separated_s1 = self.model.predict('./mixture/talk_and_music_1.wav', sample_rate)
+            separated_s2 = self.model.predict('./mixture/talk_and_music_2.wav', sample_rate)
 
         if self.denoise_later == True:
             if self.speech_enhancement == 'SS':
@@ -66,6 +74,10 @@ class Processor():
             else:
                 separated_s1 = wiener_filtering(separated_s1)
                 separated_s2 = wiener_filtering(separated_s2)
-
-        wf.write(self.dir + 'separated_s1.wav', sample_rate, separated_s1)
-        wf.write(self.dir + 'separated_s2.wav', sample_rate, separated_s2)
+        
+        if self.audio_separation == 'WUN':
+            X = np.concatenate((separated_s1, separated_s2))
+            wf.write(self.dir + 'separated.wav', sample_rate, X)
+        else:
+            wf.write(self.dir + 'separated_s1.wav', sample_rate, separated_s1)
+            wf.write(self.dir + 'separated_s2.wav', sample_rate, separated_s2)

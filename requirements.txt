@@ -1,0 +1,4 @@
+pyroomacoustics
+museval
+pydub
+resampy

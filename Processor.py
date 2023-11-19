@@ -46,7 +46,7 @@ class Processor():
             if self.speech_enhancement == 'SS':
                 s1 = spectral_substraction(s1)
                 s2 = spectral_substraction(s2)
-            else:
+            elif self.speech_enhancement == 'WF' :
                 s1 = wiener_filtering(s1)
                 s2 = wiener_filtering(s2)
 
@@ -73,7 +73,7 @@ class Processor():
             if self.speech_enhancement == 'SS':
                 separated_s1 = spectral_substraction(separated_s1)
                 separated_s2 = spectral_substraction(separated_s2)
-            else:
+            elif self.speech_enhancement == 'WF':
                 separated_s1 = wiener_filtering(separated_s1)
                 separated_s2 = wiener_filtering(separated_s2)
         

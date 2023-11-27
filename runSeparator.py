@@ -10,9 +10,13 @@ def main(device, args):
     separator = EnhancedAudioSeparator(device=device, audio_separation = args.audio_separation, speech_enhancement = args.speech_enhancement)
     if args.run_all == True:
         for entry in os.listdir(args.directory):
+            print('Start Running Enhanced Audio Separation for ' + entry)
             separator.separate(args.directory + entry)
+            print('Finished')
     else:
+        print('Start Running Enhanced Audio Separation for ' + args.file)
         separator.separate(args.file)
+        print("Finished")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -24,7 +28,7 @@ if __name__ == '__main__':
                         help="Input File")
     parser.add_argument('--run_all', type=bool, default=True,
                         help='Run All Files in a Directory')
-    parser.add_argument('--directory', tyoe=str, default='./data/')
+    parser.add_argument('--directory', type=str, default='./data/')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     args = parser.parse_args()
     main(device, args)

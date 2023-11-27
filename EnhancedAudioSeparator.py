@@ -17,6 +17,7 @@ from AudioSeparation.NMF import NMF
 from WaveUNet.WUN import WUN
 from SpeechEnhancement.SS import SS
 import torch
+import os
 
 class EnhancedAudioSeparator():
     def __init__(self, device, audio_separation = 'ICA', speech_enhancement = 'SS', denoise_later = True, denoise_before = False):
@@ -46,6 +47,7 @@ class EnhancedAudioSeparator():
 
         separated_s1 = None
         separated_s2 = None
+        file_name = os.path.basename('mixture.wav')[:-4]
         
         if self.audio_separation == 'ICA':
             X = np.c_[[s, s]]
@@ -57,10 +59,10 @@ class EnhancedAudioSeparator():
             X = s
             X_1 = X[: X.shape[0] // 2,]
             X_2 = X[X.shape[0] // 2:, ]
-            wf.write('./mixture/' + str(file) + '_part_1.wav', sr, X_1.astype(np.float32))
-            wf.write('./mixture/' + str(file) + '_part_2.wav', sr, X_2.astype(np.float32))
-            separated_s1 = self.model.predict('./mixture/' + str(file) + '_part_1.wav', sr)
-            separated_s2 = self.model.predict('./mixture/' + str(file) + '_part_2.wav', sr)
+            wf.write('./mixture/' + str(file_name) + '_part_1.wav', sr, X_1.astype(np.float32))
+            wf.write('./mixture/' + str(file_name) + '_part_2.wav', sr, X_2.astype(np.float32))
+            separated_s1 = self.model.predict('./mixture/' + str(file_name) + '_part_1.wav', sr)
+            separated_s2 = self.model.predict('./mixture/' + str(file_name) + '_part_2.wav', sr)
             separated_s1 = np.squeeze(separated_s1.T)
             separated_s2 = np.squeeze(separated_s2.T)
 
@@ -74,7 +76,7 @@ class EnhancedAudioSeparator():
         
         if self.audio_separation == 'WUN':
             X = np.concatenate((separated_s1, separated_s2))
-            wf.write(self.dir + str(file) + '_separated.wav', sr, X)
+            wf.write(self.dir + str(file_name) + '_separated.wav', sr, X)
         else:
-            wf.write(self.dir + str(file) + '_separated_s1.wav', sr, separated_s1)
-            wf.write(self.dir + str(file) +'_separated_s2.wav', sr, separated_s2)
+            wf.write(self.dir + str(file_name) + '_separated_s1.wav', sr, separated_s1)
+            wf.write(self.dir + str(file_name) +'_separated_s2.wav', sr, separated_s2)

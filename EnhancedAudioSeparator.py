@@ -47,7 +47,7 @@ class EnhancedAudioSeparator():
 
         separated_s1 = None
         separated_s2 = None
-        file_name = os.path.basename('mixture.wav')[:-4]
+        file_name = os.path.basename(file)[:-4]
         
         if self.audio_separation == 'ICA':
             X = np.c_[[s, s]]

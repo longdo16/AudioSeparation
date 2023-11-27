@@ -8,7 +8,7 @@ from EnhancedAudioSeparator import EnhancedAudioSeparator
 
 def main(device, args):
     separator = EnhancedAudioSeparator(device=device, audio_separation = args.audio_separation, speech_enhancement = args.speech_enhancement)
-    if args.run_all == True:
+    if args.run_all == 'Y' or args.run_all == 'y':
         for entry in os.listdir(args.directory):
             print('Start Running Enhanced Audio Separation for ' + entry)
             separator.separate(args.directory + entry)
@@ -26,7 +26,7 @@ if __name__ == '__main__':
                         help="Speech Enhancement Method")
     parser.add_argument('--file', type=str, default='./data/mixture.wav',
                         help="Input File")
-    parser.add_argument('--run_all', type=bool, default=True,
+    parser.add_argument('--run_all', type=str, default='N',
                         help='Run All Files in a Directory')
     parser.add_argument('--directory', type=str, default='./data/')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

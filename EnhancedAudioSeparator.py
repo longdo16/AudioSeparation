@@ -18,7 +18,7 @@ from WaveUNet.WUN import WUN
 from SpeechEnhancement.SS import SS
 import torch
 
-class Processor():
+class EnhancedAudioSeparator():
     def __init__(self, device, audio_separation = 'ICA', speech_enhancement = 'SS', denoise_later = True, denoise_before = False):
         self.device = device
         self.model = ICA(device, lr = 0.0001, max_iter = 1000, l = 10000, factor = 10.0)
@@ -34,40 +34,33 @@ class Processor():
         elif self.audio_separation == 'WUN':
             self.model = WUN()
             self.dir = './WUN/'
-            pass
     
-    def process(self, s1_file, s2_file, apply_noise = False, factor = 0.02, apply_linear_mix = False):
-        # assume s1 is the speaker wav file
-        s1, sr1 = librosa.load(s1_file)
-        s2, sr2 = librosa.load(s2_file, sr = sr1)
-        sample_rate = sr1
+    def separate(self, file):
+        s, sr = librosa.load(file)
 
         if self.denoise_before == True:
             if self.speech_enhancement == 'SS':
-                s1 = spectral_substraction(s1)
-                s2 = spectral_substraction(s2)
+                s = spectral_substraction(s)
             elif self.speech_enhancement == 'WF':
-                s1 = wiener_filtering(s1)
-                s2 = wiener_filtering(s2)
+                s = wiener_filtering(s)
 
-        X = mix_sources(s1, s2, apply_noise = apply_noise, factor = factor, apply_linear_mix = apply_linear_mix)
-        wf.write('./mixture/talk_and_music.wav', sample_rate, X.mean(axis=0).astype(np.float32))
-
+        separated_s1 = None
+        separated_s2 = None
+        
         if self.audio_separation == 'ICA':
-            X = np.c_[[X[0, :], X[0, :] ]]
+            X = np.c_[[s, s]]
             separated_s1, separated_s2 = self.model.predict_batch(X)
         elif self.audio_separation == 'NMF':
-            # X, sr = librosa.load('./mixture/talk_and_music.wav', sr = sample_rate)
-            separated_s1, separated_s2 = self.model.predict(X[0, :])
+            X = s
+            separated_s1, separated_s2 = self.model.predict(X)
         else:
-            # X = X.mean(axis=0).astype(np.float32)
-            X = X[0, :]
+            X = s
             X_1 = X[: X.shape[0] // 2,]
             X_2 = X[X.shape[0] // 2:, ]
-            wf.write('./mixture/talk_and_music_1.wav', sample_rate, X_1.astype(np.float32))
-            wf.write('./mixture/talk_and_music_2.wav', sample_rate, X_2.astype(np.float32))
-            separated_s1 = self.model.predict('./mixture/talk_and_music_1.wav', sample_rate)
-            separated_s2 = self.model.predict('./mixture/talk_and_music_2.wav', sample_rate)
+            wf.write('./mixture/' + str(file) + '_part_1.wav', sr, X_1.astype(np.float32))
+            wf.write('./mixture/' + str(file) + '_part_2.wav', sr, X_2.astype(np.float32))
+            separated_s1 = self.model.predict('./mixture/' + str(file) + '_part_1.wav', sr)
+            separated_s2 = self.model.predict('./mixture/' + str(file) + '_part_2.wav', sr)
             separated_s1 = np.squeeze(separated_s1.T)
             separated_s2 = np.squeeze(separated_s2.T)
 
@@ -81,7 +74,7 @@ class Processor():
         
         if self.audio_separation == 'WUN':
             X = np.concatenate((separated_s1, separated_s2))
-            wf.write(self.dir + 'separated.wav', sample_rate, X)
+            wf.write(self.dir + str(file) + '_separated.wav', sr, X)
         else:
-            wf.write(self.dir + 'separated_s1.wav', sample_rate, separated_s1)
-            wf.write(self.dir + 'separated_s2.wav', sample_rate, separated_s2)
+            wf.write(self.dir + str(file) + '_separated_s1.wav', sr, separated_s1)
+            wf.write(self.dir + str(file) +'_separated_s2.wav', sr, separated_s2)

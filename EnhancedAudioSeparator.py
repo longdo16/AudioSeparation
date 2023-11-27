@@ -109,5 +109,4 @@ class EnhancedAudioSeparator():
             X = np.concatenate((separated_s1, separated_s2))
             wf.write(self.dir + str(file_name) + '_WUN_' + self.speech_enhancement + '.wav', sr, X)
         else:
-            wf.write(self.dir + str(file_name) + '_' + self.audio_separation + '_' + self.speech_enhancement + '_1.wav', sr, separated_s1)
-            wf.write(self.dir + str(file_name) + '_' + self.audio_separation + '_' + self.speech_enhancement + '_2.wav', sr, separated_s2)
+            wf.write(self.dir + str(file_name) + '_' + self.audio_separation + '_' + self.speech_enhancement + '.wav', sr, separated_s1)

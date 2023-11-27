@@ -31,10 +31,34 @@ class EnhancedAudioSeparator():
 
         if self.audio_separation == 'NMF':
             self.model = NMF(device)
-            self.dir = './NMF/'
+            if self.speech_enhancement == 'SS':
+                self.dir = './NMF/NMFSS/'
+            elif self.speech_enhancement == 'WF':
+                self.dir = './NMF/NMFWF/'
+            else:
+                self.dir = './NMF/NMFNone/'
         elif self.audio_separation == 'WUN':
             self.model = WUN()
-            self.dir = './WUN/'
+            if self.speech_enhancement == 'SS':
+                self.dir = './WUN/WUNSS/'
+            elif self.speech_enhancement == 'WF':
+                self.dir = './WUN/WUNWF/'
+            else:
+                self.dir = './WUN/WUNNone/'
+        elif self.audio_separation == 'ICA':
+            self.model = ICA(device, lr = 0.0001, max_iter = 1000, l = 10000, factor = 10.0)
+            if self.speech_enhancement == 'SS':
+                self.dir = './ICA/ICASS/'
+            elif self.speech_enhancement == 'WF':
+                self.dir = './ICA/ICAWF/'
+            else:
+                self.dir = './ICA/ICANone/'
+        else:
+            self.model = None
+            if self.speech_enhancement == 'SS':
+                self.dir = './SE/SS/'
+            else:
+                self.dir = './SE/WF/'
     
     def separate(self, file):
         s, sr = librosa.load(file)
@@ -55,7 +79,7 @@ class EnhancedAudioSeparator():
         elif self.audio_separation == 'NMF':
             X = s
             separated_s1, separated_s2 = self.model.predict(X)
-        else:
+        elif self.audio_separation == 'WUN':
             X = s
             X_1 = X[: X.shape[0] // 2,]
             X_2 = X[X.shape[0] // 2:, ]
@@ -65,6 +89,13 @@ class EnhancedAudioSeparator():
             separated_s2 = self.model.predict('./mixture/' + str(file_name) + '_part_2.wav', sr)
             separated_s1 = np.squeeze(separated_s1.T)
             separated_s2 = np.squeeze(separated_s2.T)
+        else:
+            if self.speech_enhancement == 'SS':
+                X = spectral_substraction(s)
+            else:
+                X = wiener_filtering(s)
+            wf.write(self.dir + str(file_name) + '_' + self.speech_enhancement + '.wav', sr, X)
+            return
 
         if self.denoise_later == True:
             if self.speech_enhancement == 'SS':
@@ -76,7 +107,7 @@ class EnhancedAudioSeparator():
         
         if self.audio_separation == 'WUN':
             X = np.concatenate((separated_s1, separated_s2))
-            wf.write(self.dir + str(file_name) + '_separated.wav', sr, X)
+            wf.write(self.dir + str(file_name) + '_WUN_' + self.speech_enhancement + '.wav', sr, X)
         else:
-            wf.write(self.dir + str(file_name) + '_separated_s1.wav', sr, separated_s1)
-            wf.write(self.dir + str(file_name) +'_separated_s2.wav', sr, separated_s2)
+            wf.write(self.dir + str(file_name) + '_' + self.audio_separation + '_' + self.speech_enhancement + '_1.wav', sr, separated_s1)
+            wf.write(self.dir + str(file_name) + '_' + self.audio_separation + '_' + self.speech_enhancement + '_2.wav', sr, separated_s2)

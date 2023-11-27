@@ -1,0 +1,1 @@
+Output when run WUN without speech enhancement

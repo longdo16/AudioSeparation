@@ -13,7 +13,7 @@ import torchaudio
 # Implement NMF for audio source separation here
 
 class NMF():
-    def __init__(self, device, S = 2, beta = 2, max_iter = 200, epsilon = 1e-10, n_fft = 512, hop_length = 256):
+    def __init__(self, device, S = 2, beta = 2, max_iter = 100, epsilon = 1e-10, n_fft = 512, hop_length = 256):
         self.device = device
         self.S = S
         self.beta = beta

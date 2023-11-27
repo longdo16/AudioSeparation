@@ -53,15 +53,13 @@ class Processor():
                 s2 = wiener_filtering(s2)
 
         X = mix_sources(s1, s2, apply_noise = apply_noise, factor = factor, apply_linear_mix = apply_linear_mix)
-        # wf.write('./mixture/talk_and_music.wav', sample_rate, X.mean(axis=0).astype(np.float32))
+        wf.write('./mixture/' + file_name + '_mixture.wav', sample_rate, X[0, :].astype(np.float32))
 
         if self.audio_separation == 'ICA':
             separated_s1, separated_s2 = self.model.predict_batch(X)
         elif self.audio_separation == 'NMF':
-            # X, sr = librosa.load('./mixture/talk_and_music.wav', sr = sample_rate)
             separated_s1, separated_s2 = self.model.predict(X[0, :])
         else:
-            # X = X.mean(axis=0).astype(np.float32)
             X = X[0, :]
             X_1 = X[: X.shape[0] // 2,]
             X_2 = X[X.shape[0] // 2:, ]

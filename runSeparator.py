@@ -21,9 +21,9 @@ def main(device, args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--audio_separation', type=str, default='WUN',
-                        help="Audio Separation Model")
+                        help="Audio Separation Model (Options: WUN, ICA, NMF, None)")
     parser.add_argument('--speech_enhancement', type=str, default='SS',
-                        help="Speech Enhancement Method")
+                        help="Speech Enhancement Method (Options: SS, WF, None)")
     parser.add_argument('--file', type=str, default='./data/mixture.wav',
                         help="Input File")
     parser.add_argument('--run_all', type=str, default='N',

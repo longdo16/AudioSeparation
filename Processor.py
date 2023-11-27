@@ -37,7 +37,7 @@ class Processor():
             self.dir = './WUN/'
             pass
     
-    def process(self, s1_file, s2_file, apply_noise = False, factor = 0.02, apply_linear_mix = False):
+    def process(self, s1_file, s2_file, apply_noise = False, factor = 0.02, apply_linear_mix = True):
         # assume s1 is the speaker wav file
         s1, sr1 = librosa.load(s1_file)
         s2, sr2 = librosa.load(s2_file, sr = sr1)

@@ -22,7 +22,7 @@ import os
 class EnhancedAudioSeparator():
     def __init__(self, device, audio_separation = 'ICA', speech_enhancement = 'SS', denoise_later = True, denoise_before = False):
         self.device = device
-        self.model = ICA(device, lr = 0.0001, max_iter = 1000, l = 10000, factor = 10.0)
+        self.model = ICA(device, lr = 0.0001, max_iter = 100, l = 100000, factor = 10.0)
         self.audio_separation = audio_separation
         self.speech_enhancement = speech_enhancement
         self.denoise_later = denoise_later
